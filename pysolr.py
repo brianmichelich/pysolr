@@ -273,7 +273,7 @@ class Results(object):
 
 
 class Solr(object):
-    def __init__(self, url, decoder=None, timeout=60):
+    def __init__(self, url, decoder=None, timeout=60, username=None, password=None):
         self.decoder = decoder or json.JSONDecoder()
         self.url = url
         self.scheme, netloc, path, query, fragment = urlsplit(url)
@@ -287,6 +287,8 @@ class Solr(object):
         self.path = path.rstrip('/')
         self.timeout = timeout
         self.log = self._get_log()
+        self.username = username
+        self.password = password
     
     def _get_log(self):
         return LOG
@@ -294,6 +296,8 @@ class Solr(object):
     def _send_request(self, method, path, body=None, headers=None):
         if TIMEOUTS_AVAILABLE:
             http = Http(timeout=self.timeout)
+            if self.username is not None:
+                http.add_credentials(self.username, self.password)
             url = self.base_url + path
             
             try:
